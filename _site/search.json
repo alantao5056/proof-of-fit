@@ -1,0 +1,16 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Temperature Change and Carbon Dioxide",
+    "section": "",
+    "text": "stan_glm\n family:       gaussian [identity]\n formula:      temperature_change_sum ~ carbon_dioxide_emissions_sum\n observations: 29\n predictors:   2\n------\n                             Median   MAD_SD  \n(Intercept)                  -34729.3   5943.1\ncarbon_dioxide_emissions_sum      0.2      0.0\n\nAuxiliary parameter(s):\n      Median MAD_SD\nsigma 4356.4  576.0\n\n------\n* For help interpreting the printed output see ?print.stanreg\n* For info on the priors used see ?prior_summary.stanreg"
+  }
+]

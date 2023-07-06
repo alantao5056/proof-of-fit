@@ -1,0 +1,87 @@
+---
+title: "Temperature Change and Carbon Dioxide"
+execute:
+  echo: false
+  message: false
+  warning: false
+---
+```{r}
+#| message: FALSE
+library(tidyverse)
+library(janitor)
+library(scales)
+library(rstanarm)
+```
+
+
+```{r}
+temp = read.csv("data/temperature_change.csv", fileEncoding="latin1") %>% clean_names()
+carbon = read.csv("data/carbon_dioxide_emissions.csv") %>% clean_names()
+methane = read.csv("data/methane_emissions.csv") %>% clean_names()
+```
+
+```{r}
+
+temp2 = temp %>%
+  select(area, months, element, y1990:y2018) %>%
+  pivot_longer(cols = y1990:y2018,
+               names_prefix = "y",
+               names_to = "year",
+               values_to = "value") %>%
+  filter(element == "Temperature change") %>%
+  rename("country"="area") %>%
+  summarize("temperature_change" = sum(value), .by = c(country, year))
+
+```
+
+```{r}
+carbon2 = carbon %>%
+  select(country, x2018:x1990) %>%
+  mutate(x1990 = na_if(x1990, "N/A")) %>%
+  drop_na() %>%
+  transform(x1990 = as.numeric(x1990)) %>%
+  pivot_longer(cols = x1990:x2018,
+               names_prefix = "x",
+               names_to = "year",
+               values_to = "carbon_dioxide_emissions") %>%
+  arrange(country)
+```
+
+```{r}
+methane2 = methane %>%
+  select(country, x2018:x1990) %>%
+  mutate(x1990 = na_if(x1990, "N/A")) %>%
+  drop_na() %>%
+  transform(x1990 = as.numeric(x1990)) %>%
+  pivot_longer(cols = x1990:x2018,
+               names_prefix = "x",
+               names_to = "year",
+               values_to = "methane_emissions") %>%
+  arrange(country)
+```
+
+```{r}
+joined = full_join(temp2, carbon2) %>%
+  full_join(methane2) %>%
+  filter(country != "World")
+# joined
+```
+
+``` {r}
+x <- joined |>
+  summarize("carbon_dioxide_emissions_sum" = sum(carbon_dioxide_emissions, na.rm = TRUE),
+            "temperature_change_sum" = sum(temperature_change, na.rm = TRUE),
+            .by=year)
+
+# x
+```
+
+``` {r}
+fit_obj <- stan_glm(data = x, 
+                    formula = temperature_change_sum ~ carbon_dioxide_emissions_sum, 
+                    family = gaussian, 
+                    refresh = 0,
+                    seed = 9)
+fit_obj
+```
+

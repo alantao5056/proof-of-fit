@@ -1,0 +1,4 @@
+- source: project
+  quarto-pub:
+    - id: e5648af5-c13f-4f1a-b324-8593bc608cab
+      url: 'https://alienjao.quarto.pub/proof-of-fit'
