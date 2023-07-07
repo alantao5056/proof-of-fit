@@ -61,27 +61,60 @@ methane2 = methane %>%
 ```
 
 ```{r}
-joined = full_join(temp2, carbon2) %>%
-  full_join(methane2) %>%
+joined = full_join(temp2, carbon2) |>
   filter(country != "World")
-# joined
+joined
 ```
 
 ``` {r}
+# x <- joined |>
+#   summarize("carbon_dioxide_emissions_sum" = sum(carbon_dioxide_emissions, na.rm = TRUE),
+#             "temperature_change_sum" = sum(temperature_change, na.rm = TRUE),
+#             .by=year)
+
 x <- joined |>
-  summarize("carbon_dioxide_emissions_sum" = sum(carbon_dioxide_emissions, na.rm = TRUE),
-            "temperature_change_sum" = sum(temperature_change, na.rm = TRUE),
-            .by=year)
+  select(temperature_change, carbon_dioxide_emissions) |>
+  drop_na()
 
-# x
+x
 ```
 
 ``` {r}
-fit_obj <- stan_glm(data = x, 
-                    formula = temperature_change_sum ~ carbon_dioxide_emissions_sum, 
+fit_1 <- stan_glm(data = x, 
+                    formula = temperature_change ~ 1, 
                     family = gaussian, 
                     refresh = 0,
                     seed = 9)
-fit_obj
+```
+
+``` {r}
+fit_1 |> 
+  as_tibble()
+```
+```{r}
+newobs = tibble(.rows = 1)
+posterior_predict(fit_1, newdata = newobs) |>
+  as_tibble() |>
+  ggplot(aes(x = `1`)) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  geom_histogram(aes(y = after_stat(count/sum(count))), bins = 100) +
+  theme_classic() +
+  labs(title = "Average Temperature Change From 1990 to 2018",
+       subtitle = "Seems to be around 16-17 Celcius",
+       x = "Temperature Change (Celcius)",
+       y = "Percent")
+```
+```{r}
+fit_2 <- stan_glm(data = x, 
+                    formula = temperature_change ~ carbon_dioxide_emissions, 
+                    family = gaussian, 
+                    refresh = 0,
+                    seed = 9)
+x |>
+  ggplot(aes(x = carbon_dioxide_emissions, y = temperature_change)) +
+  geom_point(alpha = 0.3) +
+  scale_x_log10() +
+  geom_line(aes(y = fitted(fit_2))) +
+  geom_smooth(method = lm)
 ```
 

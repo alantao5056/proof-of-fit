@@ -1,1 +1,1 @@
-Sitemap: https://e5648af5-c13f-4f1a-b324-8593bc608cab.netlify.app/sitemap.xml
+Sitemap: https://alienjao.quarto.pub/proof-of-fit/sitemap.xml
